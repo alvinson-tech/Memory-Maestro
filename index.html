@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Maestro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Mono', monospace;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            position: relative;
+            overflow-x: hidden;
+            padding: 0 16px;
+        }
+
+        /* Enhanced background with more visual elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(100, 100, 255, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(100, 255, 100, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 50% 50%, rgba(255, 100, 100, 0.1) 0%, transparent 40%),
+                linear-gradient(45deg, rgba(66, 133, 244, 0.05) 0%, rgba(66, 133, 244, 0) 70%),
+                repeating-linear-gradient(45deg, rgba(66, 133, 244, 0.05) 0%, rgba(66, 133, 244, 0.05) 5%, transparent 5%, transparent 10%),
+                repeating-linear-gradient(-45deg, rgba(66, 133, 244, 0.05) 0%, rgba(66, 133, 244, 0.05) 5%, transparent 5%, transparent 10%);
+            z-index: -1;
+        }
+
+        .brand {
+            padding: 16px 0;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+            text-decoration: none;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .container {
+            padding: 16px 16px 32px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .score {
+            font-size: 24px;
+            margin-bottom: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .difficulty-selection {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .difficulty-btn:hover {
+            background-color: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .game-grid {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.622); /* More transparent background */
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        .game-grid.kite {
+            width: 280px;
+            height: 280px;
+        }
+
+        .game-grid.hexagon {
+            width: 300px; /* Reduced width */
+            height: 340px; /* Reduced height */
+        }
+
+        .dot {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #d0d0d0;
+            touch-action: manipulation;
+        }
+
+        /* Kite arrangement remains the same */
+        .kite .dot:nth-child(1) { top: 10px; left: 50%; transform: translateX(-50%); }
+        .kite .dot:nth-child(2) { top: 50%; left: 10px; transform: translateY(-50%); }
+        .kite .dot:nth-child(3) { top: 50%; right: 10px; transform: translateY(-50%); }
+        .kite .dot:nth-child(4) { bottom: 10px; left: 50%; transform: translateX(-50%); }
+
+        /* Updated 2x3 grid layout with reduced spacing */
+        .hexagon .dot:nth-child(1) { top: 20px; left: 40px; transform: none; }
+        .hexagon .dot:nth-child(2) { top: 140px; left: 40px; transform: none; }
+        .hexagon .dot:nth-child(3) { top: 260px; left: 40px; transform: none; }
+        .hexagon .dot:nth-child(4) { top: 20px; right: 40px; transform: none; }
+        .hexagon .dot:nth-child(5) { top: 140px; right: 40px; transform: none; }
+        .hexagon .dot:nth-child(6) { top: 260px; right: 40px; transform: none; }
+
+        @media (max-width: 480px) {
+            .dot {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .game-grid.kite {
+                width: 240px;
+                height: 240px;
+            }
+
+            .game-grid.hexagon {
+                width: 260px;
+                height: 320px;
+            }
+
+            /* Adjusted positions for mobile with reduced spacing */
+            .hexagon .dot:nth-child(1) { top: 20px; left: 35px; }
+            .hexagon .dot:nth-child(2) { top: 130px; left: 35px; }
+            .hexagon .dot:nth-child(3) { top: 240px; left: 35px; }
+            .hexagon .dot:nth-child(4) { top: 20px; right: 35px; }
+            .hexagon .dot:nth-child(5) { top: 130px; right: 35px; }
+            .hexagon .dot:nth-child(6) { top: 240px; right: 35px; }
+        }
+
+        .dot:hover {
+            transform: scale(1.05);
+            border-color: #c0c0c0;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dot.computer-active {
+            background-color: #4a90e2;
+            border-color: #357abd;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+        }
+
+        .dot.player-active {
+            background-color: #4CAF50;
+            border-color: #45a049;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .start-btn {
+            display: block;
+            margin: 24px auto 0;
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background-color: #357abd;
+        }
+
+        .start-btn:disabled {
+            background-color: #666;
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalPop 0.3s ease-out;
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h2 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+
+        .modal p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .modal button {
+            padding: 12px 24px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+
+        .modal button:hover {
+            background-color: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <a href="https://alvin.fun" class="brand">alvin.fun</a>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Memory Maestro</h1>
+            <p class="subtitle"><br>🧠 Test Your Memory, Master the Patterns! ✨<br><br>🤭 Don't let the beats confuse you! 🎧<br>(Only on Hard Mode)<br><br>~ Refresh the page, after Play Again! ~</p>
+        </div>
+
+        <div id="difficultySelect">
+            <div class="difficulty-selection">
+                <button class="difficulty-btn" data-difficulty="easy">😎 Hard</button>
+                <button class="difficulty-btn" data-difficulty="hard">😊 Easy</button>
+            </div>
+        </div>
+        
+        <div class="score" style="display: none;">Score: <span id="score">0</span></div>
+        
+        <div class="game-grid kite" id="easyGrid" style="display: none;">
+            <div class="dot" data-index="0"></div>
+            <div class="dot" data-index="1"></div>
+            <div class="dot" data-index="2"></div>
+            <div class="dot" data-index="3"></div>
+        </div>
+
+        <div class="game-grid hexagon" id="hardGrid" style="display: none;">
+            <div class="dot" data-index="0"></div>
+            <div class="dot" data-index="1"></div>
+            <div class="dot" data-index="2"></div>
+            <div class="dot" data-index="3"></div>
+            <div class="dot" data-index="4"></div>
+            <div class="dot" data-index="5"></div>
+        </div>
+        
+        <button class="start-btn" id="startBtn" style="display: none;">Start Game</button>
+    </div>
+
+    <div class="modal-overlay" id="gameOverModal">
+        <div class="modal">
+            <h2>Game Over!</h2>
+            <p>Your Score: <span id="finalScore">0</span></p>
+            <button id="playAgainBtn">Play Again</button>
+        </div>
+    </div>
+
+    <audio id="backgroundMusic" src="background.mp3" loop></audio>
+
+    <script>
+        let currentDifficulty = null;
+    let currentGrid = null;
+    let dots = null;
+    let sequence = null;  // Changed from [] to null
+    let playerSequence = null;  // Changed from [] to null
+    let score = 0;
+    let isPlaying = false;
+    let gameStarted = false;
+    let canClick = true;
+
+    const startBtn = document.getElementById('startBtn');
+    const scoreDisplay = document.getElementById('score');
+    const scoreContainer = document.querySelector('.score');
+    const gameOverModal = document.getElementById('gameOverModal');
+    const finalScoreDisplay = document.getElementById('finalScore');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const difficultySelect = document.getElementById('difficultySelect');
+    const backgroundMusic = document.getElementById('backgroundMusic');
+
+    const easyModeDelay = 300;
+    const hardModeDelay = 800;
+
+    function initializeNewGame() {
+        // Initialize fresh arrays for new game
+        sequence = [];
+        playerSequence = [];
+        score = 0;
+        scoreDisplay.textContent = '0';
+        isPlaying = false;
+        gameStarted = true;
+        canClick = true;
+    }
+
+    function getDelayForRound() {
+        return currentDifficulty === 'easy' ? easyModeDelay : hardModeDelay;
+    }
+
+    backgroundMusic.volume = 0.5;
+
+    startBtn.addEventListener('click', () => {
+        startBtn.disabled = true;
+        initializeNewGame();  // Use new initialization function
+        nextRound();
+        if (currentDifficulty === 'easy') {
+            backgroundMusic.play().catch(error => {
+                console.log("Audio playback failed:", error);
+            });
+        }
+    });
+
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentDifficulty = btn.dataset.difficulty;
+            difficultySelect.style.display = 'none';
+            
+            const easyGrid = document.getElementById('easyGrid');
+            const hardGrid = document.getElementById('hardGrid');
+            
+            if (currentDifficulty === 'easy') {
+                easyGrid.style.display = 'block';
+                currentGrid = easyGrid;
+                dots = easyGrid.querySelectorAll('.dot');
+            } else {
+                hardGrid.style.display = 'block';
+                currentGrid = hardGrid;
+                dots = hardGrid.querySelectorAll('.dot');
+            }
+            
+            scoreContainer.style.display = 'block';
+            startBtn.style.display = 'block';
+            initializeNewGame();  // Initialize fresh state when selecting difficulty
+            initializeDots();
+        });
+    });
+
+    function activateComputerDot(dot) {
+        return new Promise(resolve => {
+            dot.classList.add('computer-active');
+            const displayTime = currentDifficulty === 'easy' ? 300 : 500;
+            setTimeout(() => {
+                dot.classList.remove('computer-active');
+                resolve();
+            }, displayTime);
+        });
+    }
+
+    function activatePlayerDot(dot) {
+        dot.classList.add('player-active');
+        setTimeout(() => {
+            dot.classList.remove('player-active');
+        }, 150);
+    }
+
+    async function showSequence() {
+        isPlaying = true;
+        canClick = false;
+        
+        const currentDelay = getDelayForRound();
+        
+        for (let i = 0; i < sequence.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, currentDelay/2));
+            await activateComputerDot(dots[sequence[i]]);
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 300));
+        isPlaying = false;
+        canClick = true;
+    }
+
+    async function nextRound() {
+        const maxDots = currentDifficulty === 'easy' ? 4 : 6;
+        sequence.push(Math.floor(Math.random() * maxDots));
+        await showSequence();
+    }
+
+    function handleDotClick(index) {
+        if (!gameStarted || !canClick || isPlaying) return;
+        
+        activatePlayerDot(dots[index]);
+        playerSequence.push(index);
+        
+        const currentIndex = playerSequence.length - 1;
+        if (sequence[currentIndex] !== playerSequence[currentIndex]) {
+            gameOver();
+            return;
+        }
+        
+        if (playerSequence.length === sequence.length) {
+            score++;
+            scoreDisplay.textContent = score;
+            playerSequence = [];
+            setTimeout(nextRound, 1000);
+        }
+    }
+
+    function gameOver() {
+        gameStarted = false;
+        canClick = false;
+        finalScoreDisplay.textContent = score;
+        gameOverModal.style.display = 'flex';
+        startBtn.disabled = true;
+        if (currentDifficulty === 'easy') {
+            backgroundMusic.pause();
+            backgroundMusic.currentTime = 0;
+        }
+    }
+
+    function completeReset() {
+        // Reset everything to null or initial values
+        sequence = null;
+        playerSequence = null;
+        score = 0;
+        isPlaying = false;
+        gameStarted = false;
+        canClick = true;
+        
+        gameOverModal.style.display = 'none';
+        if (currentGrid) {
+            currentGrid.style.display = 'none';
+        }
+        scoreContainer.style.display = 'none';
+        startBtn.style.display = 'none';
+        startBtn.disabled = false;
+        difficultySelect.style.display = 'block';
+        currentDifficulty = null;
+        currentGrid = null;
+        dots = null;
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+    }
+
+    function initializeDots() {
+        dots.forEach((dot, index) => {
+            const clickHandler = () => handleDotClick(index);
+            dot.removeEventListener('click', clickHandler);
+            dot.addEventListener('click', clickHandler);
+        });
+    }
+
+    playAgainBtn.addEventListener('click', completeReset);
+
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.classList.contains('dot')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    let lastTap = 0;
+    document.addEventListener('touchend', function(e) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 500 && tapLength > 0) {
+            e.preventDefault();
+        }
+        lastTap = currentTime;
+    });
+
+    window.addEventListener('beforeunload', () => {
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+    });
+</script>
+</body>
+</html>
