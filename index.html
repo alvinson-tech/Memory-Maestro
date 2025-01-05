@@ -505,12 +505,21 @@
     }
 
     function initializeDots() {
-        dots.forEach((dot, index) => {
-            const clickHandler = () => handleDotClick(index);
-            dot.removeEventListener('click', clickHandler);
-            dot.addEventListener('click', clickHandler);
-        });
-    }
+    dots.forEach((dot, index) => {
+        const interactionHandler = (event) => {
+            event.preventDefault(); // Prevent default behavior (e.g., scrolling)
+            handleDotClick(index);
+        };
+
+        // Remove any existing event listeners to avoid duplicates
+        dot.removeEventListener('click', interactionHandler);
+        dot.removeEventListener('touchstart', interactionHandler);
+
+        // Add listeners for both click and touchstart events
+        dot.addEventListener('click', interactionHandler);
+        dot.addEventListener('touchstart', interactionHandler, { passive: false });
+    });
+}
 
     playAgainBtn.addEventListener('click', completeReset);
 
