@@ -24,7 +24,7 @@
             padding: 0 16px;
         }
 
-        /* Enhanced background with more visual elements */
+        /* Enhanced background with darker patterns */
         body::before {
             content: '';
             position: fixed;
@@ -33,15 +33,89 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 10% 20%, rgba(100, 100, 255, 0.15) 0%, transparent 30%),
-                radial-gradient(circle at 90% 80%, rgba(100, 255, 100, 0.15) 0%, transparent 30%),
-                radial-gradient(circle at 50% 50%, rgba(255, 100, 100, 0.1) 0%, transparent 40%),
-                linear-gradient(45deg, rgba(66, 133, 244, 0.05) 0%, rgba(66, 133, 244, 0) 70%),
-                repeating-linear-gradient(45deg, rgba(66, 133, 244, 0.05) 0%, rgba(66, 133, 244, 0.05) 5%, transparent 5%, transparent 10%),
-                repeating-linear-gradient(-45deg, rgba(66, 133, 244, 0.05) 0%, rgba(66, 133, 244, 0.05) 5%, transparent 5%, transparent 10%);
+                /* Base gradient overlay */
+                linear-gradient(120deg, 
+                    rgba(66, 133, 244, 0.1), 
+                    rgba(219, 68, 55, 0.1)
+                ),
+                
+                /* Diagonal patterns */
+                repeating-linear-gradient(45deg, 
+                    transparent 0px, 
+                    transparent 10px, 
+                    rgba(66, 133, 244, 0.08) 10px, 
+                    rgba(66, 133, 244, 0.08) 11px
+                ),
+                repeating-linear-gradient(-45deg, 
+                    transparent 0px, 
+                    transparent 10px, 
+                    rgba(15, 157, 88, 0.08) 10px, 
+                    rgba(15, 157, 88, 0.08) 11px
+                ),
+                
+                /* Larger circles */
+                radial-gradient(circle at 10% 20%, 
+                    rgba(66, 133, 244, 0.15) 0%, 
+                    transparent 25%
+                ),
+                radial-gradient(circle at 90% 80%, 
+                    rgba(15, 157, 88, 0.15) 0%, 
+                    transparent 25%
+                ),
+                radial-gradient(circle at 50% 50%, 
+                    rgba(219, 68, 55, 0.12) 0%, 
+                    transparent 35%
+                ),
+                
+                /* Additional smaller circles */
+                radial-gradient(circle at 20% 70%, 
+                    rgba(244, 180, 0, 0.12) 0%, 
+                    transparent 20%
+                ),
+                radial-gradient(circle at 80% 30%, 
+                    rgba(66, 133, 244, 0.12) 0%, 
+                    transparent 20%
+                ),
+                
+                /* Base color with subtle texture */
+                linear-gradient(to right,
+                    rgba(248, 250, 252, 0.9),
+                    rgba(248, 250, 252, 0.9)
+                );
             z-index: -1;
+            opacity: 0.9;
         }
 
+        /* Animated floating dots with increased visibility */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(3px 3px at 20% 30%, rgba(66, 133, 244, 0.2) 50%, transparent 50%),
+                radial-gradient(3px 3px at 40% 70%, rgba(15, 157, 88, 0.2) 50%, transparent 50%),
+                radial-gradient(3px 3px at 60% 40%, rgba(219, 68, 55, 0.2) 50%, transparent 50%),
+                radial-gradient(3px 3px at 80% 60%, rgba(244, 180, 0, 0.2) 50%, transparent 50%);
+            background-repeat: repeat;
+            background-size: 300px 300px;
+            animation: floatingDots 60s linear infinite;
+            z-index: -1;
+            opacity: 0.7;
+        }
+
+        @keyframes floatingDots {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 300px 300px;
+            }
+        }
+
+        /* Rest of your existing styles remain exactly the same */
         .brand {
             padding: 16px 0;
             font-size: 16px;
@@ -264,34 +338,19 @@
 
         .modal p {
             color: #666;
-            margin-bottom: 20px;
+            margin: 16px 0;
             font-size: 16px;
-        }
-
-        .modal button {
-            padding: 12px 24px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Space Mono', monospace;
-            transition: background-color 0.3s;
-            font-size: 16px;
-        }
-
-        .modal button:hover {
-            background-color: #357abd;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-    <a href="https://alvin.fun" class="brand">alvin.fun</a>
+    <a class="brand">alvin.fun</a>
     
     <div class="container">
         <div class="header">
             <h1>Memory Maestro</h1>
-            <p class="subtitle"><br>🧠 Test Your Memory, Master the Patterns! ✨<br><br>🤭 Don't let the beats confuse you! 🎧<br>(Only on Hard Mode)<br><br>~ Refresh the page, after Play Again! ~</p>
+            <p class="subtitle"><br>🧠 Test Your Memory, Master the Patterns! ✨<br><br>🤭 Don't let the beats confuse you! 🎧<br>(Only on Hard Mode)</p>
         </div>
 
         <div id="difficultySelect">
@@ -326,7 +385,7 @@
         <div class="modal">
             <h2>Game Over!</h2>
             <p>Your Score: <span id="finalScore">0</span></p>
-            <button id="playAgainBtn">Play Again</button>
+            <p>Refresh the Page to Try Again! 🔄</p>
         </div>
     </div>
 
@@ -334,215 +393,178 @@
 
     <script>
         let currentDifficulty = null;
-    let currentGrid = null;
-    let dots = null;
-    let sequence = null;  // Changed from [] to null
-    let playerSequence = null;  // Changed from [] to null
-    let score = 0;
-    let isPlaying = false;
-    let gameStarted = false;
-    let canClick = true;
+        let currentGrid = null;
+        let dots = null;
+        let sequence = null;
+        let playerSequence = null;
+        let score = 0;
+        let isPlaying = false;
+        let gameStarted = false;
+        let canClick = true;
 
-    const startBtn = document.getElementById('startBtn');
-    const scoreDisplay = document.getElementById('score');
-    const scoreContainer = document.querySelector('.score');
-    const gameOverModal = document.getElementById('gameOverModal');
-    const finalScoreDisplay = document.getElementById('finalScore');
-    const playAgainBtn = document.getElementById('playAgainBtn');
-    const difficultySelect = document.getElementById('difficultySelect');
-    const backgroundMusic = document.getElementById('backgroundMusic');
+        const startBtn = document.getElementById('startBtn');
+        const scoreDisplay = document.getElementById('score');
+        const scoreContainer = document.querySelector('.score');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const difficultySelect = document.getElementById('difficultySelect');
+        const backgroundMusic = document.getElementById('backgroundMusic');
 
-    const easyModeDelay = 300;
-    const hardModeDelay = 550;
+        const easyModeDelay = 300;
+        const hardModeDelay = 800;
 
-    function initializeNewGame() {
-        // Initialize fresh arrays for new game
-        sequence = [];
-        playerSequence = [];
-        score = 0;
-        scoreDisplay.textContent = '0';
-        isPlaying = false;
-        gameStarted = true;
-        canClick = true;
-    }
+        function initializeNewGame() {
+            sequence = [];
+            playerSequence = [];
+            score = 0;
+            scoreDisplay.textContent = '0';
+            isPlaying = false;
+            gameStarted = true;
+            canClick = true;
+        }
 
-    function getDelayForRound() {
-        return currentDifficulty === 'easy' ? easyModeDelay : hardModeDelay;
-    }
+        function getDelayForRound() {
+            return currentDifficulty === 'easy' ? easyModeDelay : hardModeDelay;
+        }
 
-    backgroundMusic.volume = 0.5;
+        backgroundMusic.volume = 0.5;
 
-    startBtn.addEventListener('click', () => {
-        startBtn.disabled = true;
-        initializeNewGame();  // Use new initialization function
-        nextRound();
-        if (currentDifficulty === 'easy') {
-            backgroundMusic.play().catch(error => {
-                console.log("Audio playback failed:", error);
+        startBtn.addEventListener('click', () => {
+            startBtn.disabled = true;
+            initializeNewGame();
+            nextRound();
+            if (currentDifficulty === 'easy') {
+                backgroundMusic.play().catch(error => {
+                    console.log("Audio playback failed:", error);
+                });
+            }
+        });
+
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentDifficulty = btn.dataset.difficulty;
+                difficultySelect.style.display = 'none';
+                
+                const easyGrid = document.getElementById('easyGrid');
+                const hardGrid = document.getElementById('hardGrid');
+                
+                if (currentDifficulty === 'easy') {
+                    easyGrid.style.display = 'block';
+                    currentGrid = easyGrid;
+                    dots = easyGrid.querySelectorAll('.dot');
+                } else {
+                    hardGrid.style.display = 'block';
+                    currentGrid = hardGrid;
+                    dots = hardGrid.querySelectorAll('.dot');
+                }
+                
+                scoreContainer.style.display = 'block';
+                startBtn.style.display = 'block';
+                initializeNewGame();
+                initializeDots();
+            });
+        });
+
+        function activateComputerDot(dot) {
+            return new Promise(resolve => {
+                dot.classList.add('computer-active');
+                const displayTime = currentDifficulty === 'easy' ? 300 : 500;
+                setTimeout(() => {
+                    dot.classList.remove('computer-active');
+                    resolve();
+                }, displayTime);
             });
         }
-    });
 
-    document.querySelectorAll('.difficulty-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            currentDifficulty = btn.dataset.difficulty;
-            difficultySelect.style.display = 'none';
+        function activatePlayerDot(dot) {
+            dot.classList.add('player-active');
+            setTimeout(() => {
+                dot.classList.remove('player-active');
+            }, 150);
+        }
+
+        async function showSequence() {
+            isPlaying = true;
+            canClick = false;
             
-            const easyGrid = document.getElementById('easyGrid');
-            const hardGrid = document.getElementById('hardGrid');
+            const currentDelay = getDelayForRound();
             
-            if (currentDifficulty === 'easy') {
-                easyGrid.style.display = 'block';
-                currentGrid = easyGrid;
-                dots = easyGrid.querySelectorAll('.dot');
-            } else {
-                hardGrid.style.display = 'block';
-                currentGrid = hardGrid;
-                dots = hardGrid.querySelectorAll('.dot');
+            for (let i = 0; i < sequence.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, currentDelay/2));
+                await activateComputerDot(dots[sequence[i]]);
             }
             
-            scoreContainer.style.display = 'block';
-            startBtn.style.display = 'block';
-            initializeNewGame();  // Initialize fresh state when selecting difficulty
-            initializeDots();
+            await new Promise(resolve => setTimeout(resolve, 300));
+            isPlaying = false;
+            canClick = true;
+        }
+
+        async function nextRound() {
+            const maxDots = currentDifficulty === 'easy' ? 4 : 6;
+            sequence.push(Math.floor(Math.random() * maxDots));
+            await showSequence();
+        }
+
+        function handleDotClick(index) {
+            if (!gameStarted || !canClick || isPlaying) return;
+            
+            activatePlayerDot(dots[index]);
+            playerSequence.push(index);
+            
+            const currentIndex = playerSequence.length - 1;
+            if (sequence[currentIndex] !== playerSequence[currentIndex]) {
+                gameOver();
+                return;
+            }
+            
+            if (playerSequence.length === sequence.length) {
+                score++;
+                scoreDisplay.textContent = score;
+                playerSequence = [];
+                setTimeout(nextRound, 1000);
+            }
+        }
+
+        function gameOver() {
+            gameStarted = false;
+            canClick = false;
+            finalScoreDisplay.textContent = score;
+            gameOverModal.style.display = 'flex';
+            startBtn.disabled = true;
+            if (currentDifficulty === 'easy') {
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0;
+            }
+        }
+
+        function initializeDots() {
+            dots.forEach((dot, index) => {
+                const clickHandler = () => handleDotClick(index);
+                dot.removeEventListener('click', clickHandler);
+                dot.addEventListener('click', clickHandler);
+            });
+        }
+
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.classList.contains('dot')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTap = 0;
+        document.addEventListener('touchend', function(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 500 && tapLength > 0) {
+                e.preventDefault();
+            }
+            lastTap = currentTime;
         });
-    });
 
-    function activateComputerDot(dot) {
-        return new Promise(resolve => {
-            dot.classList.add('computer-active');
-            const displayTime = currentDifficulty === 'easy' ? 300 : 500;
-            setTimeout(() => {
-                dot.classList.remove('computer-active');
-                resolve();
-            }, displayTime);
-        });
-    }
-
-    function activatePlayerDot(dot) {
-        dot.classList.add('player-active');
-        setTimeout(() => {
-            dot.classList.remove('player-active');
-        }, 150);
-    }
-
-    async function showSequence() {
-        isPlaying = true;
-        canClick = false;
-        
-        const currentDelay = getDelayForRound();
-        
-        for (let i = 0; i < sequence.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, currentDelay/2));
-            await activateComputerDot(dots[sequence[i]]);
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 300));
-        isPlaying = false;
-        canClick = true;
-    }
-
-    async function nextRound() {
-        const maxDots = currentDifficulty === 'easy' ? 4 : 6;
-        sequence.push(Math.floor(Math.random() * maxDots));
-        await showSequence();
-    }
-
-    function handleDotClick(index) {
-        if (!gameStarted || !canClick || isPlaying) return;
-        
-        activatePlayerDot(dots[index]);
-        playerSequence.push(index);
-        
-        const currentIndex = playerSequence.length - 1;
-        if (sequence[currentIndex] !== playerSequence[currentIndex]) {
-            gameOver();
-            return;
-        }
-        
-        if (playerSequence.length === sequence.length) {
-            score++;
-            scoreDisplay.textContent = score;
-            playerSequence = [];
-            setTimeout(nextRound, 1000);
-        }
-    }
-
-    function gameOver() {
-        gameStarted = false;
-        canClick = false;
-        finalScoreDisplay.textContent = score;
-        gameOverModal.style.display = 'flex';
-        startBtn.disabled = true;
-        if (currentDifficulty === 'easy') {
+        window.addEventListener('beforeunload', () => {
             backgroundMusic.pause();
             backgroundMusic.currentTime = 0;
-        }
-    }
-
-    function completeReset() {
-        // Reset everything to null or initial values
-        sequence = null;
-        playerSequence = null;
-        score = 0;
-        isPlaying = false;
-        gameStarted = false;
-        canClick = true;
-        
-        gameOverModal.style.display = 'none';
-        if (currentGrid) {
-            currentGrid.style.display = 'none';
-        }
-        scoreContainer.style.display = 'none';
-        startBtn.style.display = 'none';
-        startBtn.disabled = false;
-        difficultySelect.style.display = 'block';
-        currentDifficulty = null;
-        currentGrid = null;
-        dots = null;
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-    }
-
-    function initializeDots() {
-    dots.forEach((dot, index) => {
-        const interactionHandler = (event) => {
-            event.preventDefault(); // Prevent default behavior (e.g., scrolling)
-            handleDotClick(index);
-        };
-
-        // Remove any existing event listeners to avoid duplicates
-        dot.removeEventListener('click', interactionHandler);
-        dot.removeEventListener('touchstart', interactionHandler);
-
-        // Add listeners for both click and touchstart events
-        dot.addEventListener('click', interactionHandler);
-        dot.addEventListener('touchstart', interactionHandler, { passive: false });
-    });
-}
-
-    playAgainBtn.addEventListener('click', completeReset);
-
-    document.addEventListener('touchstart', function(e) {
-        if (e.target.classList.contains('dot')) {
-            e.preventDefault();
-        }
-    }, { passive: false });
-
-    let lastTap = 0;
-    document.addEventListener('touchend', function(e) {
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        if (tapLength < 500 && tapLength > 0) {
-            e.preventDefault();
-        }
-        lastTap = currentTime;
-    });
-
-    window.addEventListener('beforeunload', () => {
-        backgroundMusic.pause();
-        backgroundMusic.currentTime = 0;
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
